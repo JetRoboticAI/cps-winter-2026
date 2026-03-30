@@ -1,0 +1,345 @@
+[
+    {
+        "id": "3e1ec227d44610a8",
+        "type": "tab",
+        "label": "LaundryTrack Pro Dashboard",
+        "disabled": false
+    },
+    {
+        "id": "79b126194395b711",
+        "type": "mqtt in",
+        "z": "3e1ec227d44610a8",
+        "name": "",
+        "topic": "laundry/machine1/status",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "d4a11e1f265aaf73",
+        "nl": false,
+        "rap": false,
+        "inputs": 0,
+        "x": 120,
+        "y": 80,
+        "wires": [
+            [
+                "193f2828164f917b",
+                "687fd0d9c1193edb"
+            ]
+        ]
+    },
+    {
+        "id": "193f2828164f917b",
+        "type": "json",
+        "z": "3e1ec227d44610a8",
+        "name": "Parse status JSON",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 390,
+        "y": 80,
+        "wires": [
+            [
+                "537804877a99e447"
+            ]
+        ]
+    },
+    {
+        "id": "537804877a99e447",
+        "type": "function",
+        "z": "3e1ec227d44610a8",
+        "name": "Format Status",
+        "func": "// Check if payload is a string and try to parse it if necessary\nlet data = msg.payload;\nif (typeof data === 'string') {\n    try {\n        data = JSON.parse(data); // Ensure data is a JSON object\n    } catch (e) {\n        // Fallback if it's just a raw string like \"RUNNING\"\n    }\n}\n\n// Extract state from the object or use raw payload\nlet s = (data && data.state) ? data.state : data;\n\n// Logic for Dashboard display\nif (s === 'RUNNING' || s === 'WASHING' || s === 'SPINNING' || s === 'STARTING') {\n    msg.payload = '🔴 RUNNING'; // Status active\n} else {\n    msg.payload = '🟢 IDLE';    // Status inactive/complete\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 80,
+        "wires": [
+            [
+                "37c9e0a03283cda9"
+            ]
+        ]
+    },
+    {
+        "id": "37c9e0a03283cda9",
+        "type": "ui-text",
+        "z": "3e1ec227d44610a8",
+        "group": "f702b758635af7c9",
+        "order": 1,
+        "width": "",
+        "height": "",
+        "name": "Current State",
+        "label": "Current State",
+        "format": "<h1 style='text-align:center'>{{msg.payload}}</h1>",
+        "layout": "row-left",
+        "style": true,
+        "font": "Times New Roman,Times,serif",
+        "fontSize": "25",
+        "color": "#074be9",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "x": 870,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "84870f07aeb3bbfe",
+        "type": "mqtt in",
+        "z": "3e1ec227d44610a8",
+        "name": "",
+        "topic": "laundry/machine1/event",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "d4a11e1f265aaf73",
+        "nl": false,
+        "rap": false,
+        "inputs": 0,
+        "x": 110,
+        "y": 200,
+        "wires": [
+            [
+                "5067703906719a49",
+                "c217c1334b6b9f43"
+            ]
+        ]
+    },
+    {
+        "id": "5067703906719a49",
+        "type": "json",
+        "z": "3e1ec227d44610a8",
+        "name": "Parse event JSON",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 390,
+        "y": 200,
+        "wires": [
+            [
+                "1b4fde1edd1e8a41"
+            ]
+        ]
+    },
+    {
+        "id": "1b4fde1edd1e8a41",
+        "type": "function",
+        "z": "3e1ec227d44610a8",
+        "name": "Format Event",
+        "func": "let data = msg.payload;\nif (typeof data === 'string') {\n    try {\n        data = JSON.parse(data);\n    } catch (e) {}\n}\n\n// Map properties with default fallbacks to avoid \"undefined\"\nlet eventName = (data && data.event) ? data.event : \"N/A\";\nlet eventTime = (data && data.time) ? data.time : new Date().toLocaleTimeString();\n\n// Format string for the UI text node\nmsg.payload = `Event: ${eventName}\\nTime: ${eventTime}`;\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 200,
+        "wires": [
+            [
+                "7d88d55c5e5069e4"
+            ]
+        ]
+    },
+    {
+        "id": "7d88d55c5e5069e4",
+        "type": "ui-text",
+        "z": "3e1ec227d44610a8",
+        "group": "dd59ac99a525c1c0",
+        "order": 1,
+        "width": "",
+        "height": "",
+        "name": "",
+        "label": "Latest Event",
+        "format": "<pre style='font-size:16px'>{{msg.payload}}</pre>",
+        "layout": "",
+        "style": true,
+        "font": "Times New Roman,Times,serif",
+        "fontSize": "20",
+        "color": "#000000",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "x": 870,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "687fd0d9c1193edb",
+        "type": "debug",
+        "z": "3e1ec227d44610a8",
+        "name": "Debug Status",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 380,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "c217c1334b6b9f43",
+        "type": "debug",
+        "z": "3e1ec227d44610a8",
+        "name": "Debug Event",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 370,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "d4a11e1f265aaf73",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "broker.hivemq.com:1883",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "f702b758635af7c9",
+        "type": "ui-group",
+        "name": "Machine Status",
+        "page": "b98a0191d106d0fd",
+        "width": "6",
+        "height": "",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "dd59ac99a525c1c0",
+        "type": "ui-group",
+        "name": "Events",
+        "page": "b98a0191d106d0fd",
+        "width": "6",
+        "height": "",
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "b98a0191d106d0fd",
+        "type": "ui-page",
+        "name": "Dashboard",
+        "ui": "ui_base1",
+        "path": "/laundry",
+        "icon": "",
+        "layout": "grid",
+        "theme": "f1b360eef52e8680",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 1,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "ui_base1",
+        "type": "ui-base",
+        "name": "LaundryTrack UI",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": true,
+        "headerContent": "page",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": 5,
+        "showDisconnectNotification": true,
+        "allowInstall": true
+    },
+    {
+        "id": "f1b360eef52e8680",
+        "type": "ui-theme",
+        "name": "Default Theme",
+        "colors": {
+            "surface": "#9bc1f3",
+            "primary": "#ffffff",
+            "bgPage": "#fafafa",
+            "groupBg": "#fafafa",
+            "groupOutline": "#cccccc"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    },
+    {
+        "id": "5c7b1a96f8fdb0ca",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "@flowfuse/node-red-dashboard": "1.30.2"
+        }
+    }
+]
