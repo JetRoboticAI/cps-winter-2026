@@ -33,9 +33,9 @@ mqtt_client = mqtt.Client()
 
 DB_FILE = "laundry_monitor.db"
 
-# Detection parameters
+# Detection parameters need to be tuned based on actual machine vibration patterns
 
-THRESHOLD = 0.01
+THRESHOLD = 0.05
 START_CONFIRM = 10
 STOP_CONFIRM = 120
 SAMPLE_INTERVAL = 0.5
